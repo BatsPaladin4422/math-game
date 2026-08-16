@@ -11,28 +11,35 @@ body {
 #question {
     font-family: "JetBrains Mono";
     text-align: center;
-    font-size: 3vh;
+    font-size: 3vmin;
 }
 
 #answer {
     font-family: "JetBrains Mono";
     text-align: center;
-    font-size: 2vh;
+    font-size: 2vmin;
 }
 
 #timer {
     font-family: "JetBrains Mono";
     text-align: center;
-    font-size: 2vh;
+    font-size: 2vmin;
 }
 
 #answers {
     font-family: "JetBrains Mono";
     text-align: center;
-    font-size: 1.5vh;
+    font-size: 1.5vmin;
 }
 
 .grayed {
     font-family: "JetBrains Mono";
     color: gray
+}
+
+#start {
+    font-size: 3vmin;
+    text-align: center;
+    font-family: "JetBrains Mono";
+    text-align: center;
 }

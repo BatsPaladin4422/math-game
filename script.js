@@ -8,20 +8,16 @@ let usedExpressions = []
 
 let correct = 0
 
-const startingTime = Date.now()
+let startingTime = Date.now()
 let totalTime = 10000
 
-let paused = false
+let paused = true
 
 let ops = ["+", "-", "*", ""]
 let opMult = 1.5
 
 
 let seed = 0
-if(args.length >= 1) {
-    seed = Number.parseFloat(args.substring(1))
-} else seed = (Math.random() * 2 ** 32) >>> 0
-console.log(seed)
 
 function mulberry32(a) {
   return function() {
@@ -32,17 +28,17 @@ function mulberry32(a) {
   }
 }
 
-const random = mulberry32(seed)
+let random
 
 addEventListener("keydown", (event) => {
-    if(paused) return;
-    console.log(event.code)
     if((legalChars.includes(event.key) || event.key == "-" && input == "")) {
         document.getElementById("answer").classList.remove("grayed")
         input += event.key
         document.getElementById("answer").innerText = input
     } else if(event.code == "Enter") {
-        submit()
+        if(paused) {
+            if(input.length >= 4) return start()
+        } else submit()
     } else if(event.code == "Backspace") {
         if(event.ctrlKey || event.metaKey) {
             input = ""
@@ -87,7 +83,52 @@ function nextQuestion() {
     document.getElementById("question").innerText = question
 }
 
-nextQuestion()
+function start() {
+    correct = 0
+    startingTime = Date.now()
+    totalTime = 10000
+    if(args.length >= 1) {
+        seed = Number.parseFloat(args.substring(1))
+    } else if(evaluate(input) >= -Infinity) {
+        seed = evaluate(input)
+    } else seed = (Math.random() * 2 ** 32) >>> 0
+    random = mulberry32(seed)
+
+    input = ""
+    document.getElementById("answer").classList.add("grayed")
+    document.getElementById("answer").innerText = "Answer... (type to enter)"
+
+    paused = false
+    nextQuestion()
+
+    document.getElementById("answers").innerText = "0✔︎"
+    document.getElementById("question").hidden = false
+    document.getElementById("timer").hidden = false
+    document.getElementById("start").hidden = true
+}
+
+function end() {
+    paused = true
+    document.getElementById("answers").innerText += " Rank:" + getRank(correct) + " Seed: " + seed
+    document.getElementById("question").hidden = true
+    document.getElementById("timer").hidden = true
+    document.getElementById("start").hidden = false
+
+    input = ""
+    document.getElementById("answer").classList.add("grayed")
+    document.getElementById("answer").innerText = "Seed... (type to enter)"
+
+}
+
+function getRank(amount) {
+    if(amount >= 35) return "S" + "+".repeat(Math.floor((amount - 30) / 5))
+    if(amount >= 30) return "S"
+    if(amount >= 20) return "A"
+    if(amount >= 15) return "B"
+    if(amount >= 10) return "C"
+    if(amount >= 5) return "D"
+    return "F"
+}
 
 setInterval(() => {
     if(paused) return;
@@ -101,8 +142,7 @@ setInterval(() => {
     time = Math.round((totalTime - (Date.now() - startingTime)) / 10) / 100
 
     if(time <= 0) {
-        paused = true
-        document.getElementById("answers").innerText += " Seed: " + seed
+        end()
     }
 
     if(time % 1 == 0) time += ".0"
