@@ -43,3 +43,17 @@ body {
     font-family: "JetBrains Mono";
     text-align: center;
 }
+
+.keyrow {
+    justify-content: center;
+}
+
+button {
+    width: 10vmin;
+    height: 10vmin;
+    font-size: 4vmin;
+    background-color: 3f3f3f;
+    border:none;
+    margin: 3;
+    color:white
+}

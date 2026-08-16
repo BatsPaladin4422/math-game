@@ -7,6 +7,8 @@ let count = 0
 let usedExpressions = []
 
 let correct = 0
+let totalOperations = 0
+let currentOperations = 0
 
 let startingTime = Date.now()
 let totalTime = 10000
@@ -18,6 +20,52 @@ let opMult = 1.5
 
 
 let seed = 0
+
+const width = visualViewport.width
+const height = visualViewport.height
+
+if(args == "#mobile") {
+    args = ""
+    const keys = [
+        ["1", "2", "3", "4", "5", ".", "⏎"],
+        ["6", "7", "8", "9", "0", "-", "⌫"]
+    ]
+    const keyTypes = [
+        [
+            {key: "1"},
+            {key: "2"},
+            {key: "3"},
+            {key: "4"},
+            {key: "5"},
+            {key: "."},
+            {code: "Enter"}
+        ],
+        [
+            {key: "6"},
+            {key: "7"},
+            {key: "8"},
+            {key: "9"},
+            {key: "0"},
+            {key: "-"},
+            {code: "Backspace"}
+        ]
+    ]
+    for (let y = 0; y < 2; y++) {
+        const row = document.createElement("div")
+        row.style.display = 'flex';
+        row.classList.add("keyRow")
+        for (let x = 0; x < 7; x++) {
+            const button = document.createElement("button")
+            
+            button.innerText = keys[y][x]
+            let event = keyTypes[y][x]
+            button.onclick = (() => {pressed(event)})
+            
+            row.appendChild(button)
+        }
+        holder.appendChild(row)
+    }
+}
 
 function mulberry32(a) {
   return function() {
@@ -31,6 +79,10 @@ function mulberry32(a) {
 let random
 
 addEventListener("keydown", (event) => {
+    pressed(event)
+})
+
+function pressed(event) {
     if((legalChars.includes(event.key) || event.key == "-" && input == "")) {
         document.getElementById("answer").classList.remove("grayed")
         input += event.key
@@ -54,10 +106,11 @@ addEventListener("keydown", (event) => {
             }
         }
     }
-})
+}
 
 function submit() {
     if(Math.abs(evaluate(input) - evaluate(question)) < 0.1) {
+        totalOperations += currentOperations
         correct++
         document.getElementById("answers").innerText = correct + "✔︎"
         nextQuestion()
@@ -69,9 +122,11 @@ function submit() {
 }
 
 function nextQuestion() {
+    currentOperations = 0
     question = (Math.floor(random() * 9) + 1) + ""
     let lastOp = -1
     for(let i = 0; i < Math.max(1, Math.log(correct) * opMult); i++) {
+        currentOperations++
         let op = lastOp
         while(op == lastOp) {
             op = Math.floor(Math.pow(random(), 1.2) * ops.length)
@@ -85,6 +140,7 @@ function nextQuestion() {
 
 function start() {
     correct = 0
+    totalOperations = 0
     startingTime = Date.now()
     totalTime = 10000
     if(args.length >= 1) {
@@ -109,7 +165,7 @@ function start() {
 
 function end() {
     paused = true
-    document.getElementById("answers").innerText += " Rank:" + getRank(correct) + " Seed: " + seed
+    document.getElementById("answers").innerText += " Rank:" + getRank() + " Seed: " + seed
     document.getElementById("question").hidden = true
     document.getElementById("timer").hidden = true
     document.getElementById("start").hidden = false
@@ -120,14 +176,10 @@ function end() {
 
 }
 
-function getRank(amount) {
-    if(amount >= 35) return "S" + "+".repeat(Math.floor((amount - 30) / 5))
-    if(amount >= 30) return "S"
-    if(amount >= 20) return "A"
-    if(amount >= 15) return "B"
-    if(amount >= 10) return "C"
-    if(amount >= 5) return "D"
-    return "F"
+const ranks = ["F", "F", "F", "F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+", "S-", "S", "S+", "S++", "S+++", "S++++", "S+++++"]
+function getRank() { 
+    const opsPerSecond = (totalOperations / totalTime) * 1000
+    return ranks[Math.floor(opsPerSecond * 20)]
 }
 
 setInterval(() => {
