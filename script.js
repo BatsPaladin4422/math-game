@@ -89,7 +89,7 @@ function pressed(event) {
         document.getElementById("answer").innerText = input
     } else if(event.code == "Enter") {
         if(paused) {
-            if(input.length >= 4) return start()
+            if(input.length >= 4 || totalTime <= -2500) return start()
         } else submit()
     } else if(event.code == "Backspace") {
         if(event.ctrlKey || event.metaKey) {
@@ -102,7 +102,8 @@ function pressed(event) {
             document.getElementById("answer").innerText = input
             if(input.length == 0) {
                 document.getElementById("answer").classList.add("grayed")
-                document.getElementById("answer").innerText = "Answer... (type to enter)"
+                if(paused) document.getElementById("answer").innerText = "Seed... (type to enter)"
+                    else document.getElementById("answer").innerText = "Answer... (type to enter)"
             }
         }
     }
@@ -165,7 +166,7 @@ function start() {
 
 function end() {
     paused = true
-    document.getElementById("answers").innerText += " Rank:" + getRank() + " Seed: " + seed
+    document.getElementById("answers").innerText += " Rank: " + getRank() + " Seed: " + seed
     document.getElementById("question").hidden = true
     document.getElementById("timer").hidden = true
     document.getElementById("start").hidden = false
@@ -173,17 +174,20 @@ function end() {
     input = ""
     document.getElementById("answer").classList.add("grayed")
     document.getElementById("answer").innerText = "Seed... (type to enter)"
-
+    totalTime = 0
 }
 
-const ranks = ["F", "F", "F", "F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+", "S-", "S", "S+", "S++", "S+++", "S++++", "S+++++"]
+const ranks = ["F", "F", "F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+", "S-", "S", "S+", "S++", "S+++", "S++++", "S+++++", "S++++++", "S+++++++", "S++++++++", "S+++++++++", "S++++++++++"]
 function getRank() { 
     const opsPerSecond = (totalOperations / totalTime) * 1000
     return ranks[Math.floor(opsPerSecond * 20)]
 }
 
 setInterval(() => {
-    if(paused) return;
+    if(paused) {
+        totalTime -= 100
+        return totalTime -= time;
+    };
 
     let time = Math.round((totalTime - (Date.now() - startingTime)) / 10) / 100
 
